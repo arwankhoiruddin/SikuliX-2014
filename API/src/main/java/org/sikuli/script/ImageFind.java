@@ -348,7 +348,19 @@ public class ImageFind implements Iterator<Match>{
     Mat bi = new Mat();
     Mat pi = new Mat();
     if (!isPlainColor) {
-      Imgproc.matchTemplate(base, probe, res, Imgproc.TM_CCOEFF_NORMED);
+      // convert base and probe to grayscale
+      Mat base_gray = new Mat();
+      Mat probe_gray = new Mat();
+      Imgproc.cvtColor(base, base_gray, Imgproc.COLOR_RGB2GRAY);
+      Imgproc.cvtColor(probe, probe_gray, Imgproc.COLOR_RGB2GRAY);
+
+      // canny edge detection
+      Imgproc.Canny(base_gray, bi, 50, 200);
+      Imgproc.Canny(probe_gray, pi, 50, 200);
+
+      // template matching using binary edge information
+      Imgproc.matchTemplate(bi, pi, res, Imgproc.TM_SQDIFF_NORMED);
+      // original code: Imgproc.matchTemplate(base, probe, res, Imgproc.TM_CCOEFF_NORMED);
     } else {
       if (isBlack) {
         Core.bitwise_not(base, bi);
